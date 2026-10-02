@@ -127,11 +127,10 @@ with tab_szt:
             y='Nazwa dania',
             orientation='h',
             title=f"Top {top_n} dań pod względem liczby sztuk",
-            text_auto=',.0f',
             color_discrete_sequence=['#2b5c8f']
         )
-        # Wymuszenie wyświetlania pełnych liczb z odstępem jako operatorem tysięcy:
-fig_szt.update_traces(texttemplate='%{text:,.0f}', textposition='auto')
+        # Formatowanie etykiet wartości – pełne liczby bez skrótu 'k'
+        fig_szt.update_traces(texttemplate='%{x:,.0f}', textposition='outside')
         fig_szt.update_layout(
             yaxis={'categoryorder': 'total ascending'}, 
             xaxis_title="Łączna ilość (szt)",
@@ -159,9 +158,10 @@ with tab_kg:
             y='Nazwa dania',
             orientation='h',
             title=f"Top {top_n} dań pod względem wagi (kg)",
-            text_auto=',.2f',
             color_discrete_sequence=['#e07a5f']
         )
+        # Formatowanie etykiet wartości – waga do 2 miejsc po przecinku
+        fig_kg.update_traces(texttemplate='%{x:,.2f}', textposition='outside')
         fig_kg.update_layout(
             yaxis={'categoryorder': 'total ascending'}, 
             xaxis_title="Łączna waga (kg)",
