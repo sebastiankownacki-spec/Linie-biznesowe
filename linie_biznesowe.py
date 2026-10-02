@@ -15,7 +15,7 @@ SHEET_ID = "1H4ul1i1LlHDW-ody6x3RKHRIJkLXn1sfNPeQZhbPLrY"
 GID = "2051498847"
 DATA_URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&gid={GID}"
 
-@st.cache_data(ttl=600)  # Odświeżanie danych co 10 minut
+@st.cache_data(ttl=60)  # Odświeżanie danych co 1 minutę
 def load_data():
     df = pd.read_csv(DATA_URL)
     
@@ -92,14 +92,16 @@ df_filtered = df_filtered[
 st.title("📊 Panel Analizy Produkcyjnej")
 st.markdown("---")
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric("Liczba pozycji", len(df_filtered))
 with col2:
-    st.metric("Liczba unikalnych dań", df_filtered['Nazwa dania'].nunique())
+    st.metric("Liczba unikalnych dań", df_filtered['Nazwa dania'].nunique() if 'Nazwa dania' in df_filtered.columns else 0)
 with col3:
-    st.metric("Suma wyprodukowanych sztuk", f"{df_filtered[df_filtered['Jednostka'] == 'szt']['Ilość'].sum():,.0f} szt")
+    st.metric("Liczba unikalnych składników", df_filtered['Składnik'].nunique() if 'Składnik' in df_filtered.columns else 0)
 with col4:
+    st.metric("Suma wyprodukowanych sztuk", f"{df_filtered[df_filtered['Jednostka'] == 'szt']['Ilość'].sum():,.0f} szt")
+with col5:
     st.metric("Suma masy składników", f"{df_filtered[df_filtered['Jednostka'] == 'kg']['Ilość'].sum():,.2f} kg")
 
 st.markdown("---")
@@ -289,10 +291,27 @@ st.dataframe(
     height=300
 )
 
-# Przycisk pobierania pliku Excel (.xlsx) - Bezpieczny i poprawnie sformatowany w Excelu
+# --- GENEROWANIE PLIKU EXCEL Z AUTO-SZEROKOŚCIĄ KOLUMN ---
 buffer = io.BytesIO()
+
+df_excel = df_filtered.copy()
+if 'Data produkcji' in df_excel.columns:
+    df_excel['Data produkcji'] = df_excel['Data produkcji'].astype(str)
+if 'Data menu' in df_excel.columns:
+    df_excel['Data menu'] = df_excel['Data menu'].astype(str)
+
 with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-    df_filtered.to_excel(writer, index=False, sheet_name='Produkcja')
+    df_excel.to_excel(writer, index=False, sheet_name='Produkcja')
+    
+    worksheet = writer.sheets['Produkcja']
+    for col in worksheet.columns:
+        max_len = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            val_str = str(cell.value or '')
+            if len(val_str) > max_len:
+                max_len = len(val_str)
+        worksheet.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
 col_down1, col_down2 = st.columns(2)
 
@@ -305,10 +324,14 @@ with col_down1:
     )
 
 with col_down2:
-    # Zastąpienie kropek przecinkami w ilości dla CSV dostosowanego do polskiej wersji językowej Excela
     df_csv = df_filtered.copy()
+    if 'Data produkcji' in df_csv.columns:
+        df_csv['Data produkcji'] = df_csv['Data produkcji'].astype(str)
+    if 'Data menu' in df_csv.columns:
+        df_csv['Data menu'] = df_csv['Data menu'].astype(str)
     if 'Ilość' in df_csv.columns:
         df_csv['Ilość'] = df_csv['Ilość'].astype(str).str.replace('.', ',', regex=False)
+        
     csv_data = df_csv.to_csv(index=False, sep=';', encoding='utf-8-sig').encode('utf-8-sig')
     
     st.download_button(
