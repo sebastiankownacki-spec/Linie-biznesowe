@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import io
 
 # 1. Konfiguracja strony
 st.set_page_config(
@@ -288,11 +289,31 @@ st.dataframe(
     height=300
 )
 
-# Przycisk pobierania przefiltrowanych danych z poprawionym kodowaniem i separatorem dla Excela
-csv_data = df_filtered.to_csv(index=False, sep=';', encoding='utf-8-sig').encode('utf-8-sig')
-st.download_button(
-    label="📥 Pobierz przefiltrowane dane do CSV",
-    data=csv_data,
-    file_name="przefiltrowana_produkcja.csv",
-    mime="text/csv"
-)
+# Przycisk pobierania pliku Excel (.xlsx) - Bezpieczny i poprawnie sformatowany w Excelu
+buffer = io.BytesIO()
+with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+    df_filtered.to_excel(writer, index=False, sheet_name='Produkcja')
+
+col_down1, col_down2 = st.columns(2)
+
+with col_down1:
+    st.download_button(
+        label="📊 Pobierz dane do pliku Excel (.xlsx)",
+        data=buffer.getvalue(),
+        file_name="przefiltrowana_produkcja.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+with col_down2:
+    # Zastąpienie kropek przecinkami w ilości dla CSV dostosowanego do polskiej wersji językowej Excela
+    df_csv = df_filtered.copy()
+    if 'Ilość' in df_csv.columns:
+        df_csv['Ilość'] = df_csv['Ilość'].astype(str).str.replace('.', ',', regex=False)
+    csv_data = df_csv.to_csv(index=False, sep=';', encoding='utf-8-sig').encode('utf-8-sig')
+    
+    st.download_button(
+        label="📄 Pobierz dane do CSV (.csv)",
+        data=csv_data,
+        file_name="przefiltrowana_produkcja.csv",
+        mime="text/csv"
+    )
