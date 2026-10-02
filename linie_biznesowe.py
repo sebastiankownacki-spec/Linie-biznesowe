@@ -130,6 +130,8 @@ with tab_szt:
             text_auto=',.0f',
             color_discrete_sequence=['#2b5c8f']
         )
+        # Wymuszenie wyświetlania pełnych liczb z odstępem jako operatorem tysięcy:
+fig_szt.update_traces(texttemplate='%{text:,.0f}', textposition='auto')
         fig_szt.update_layout(
             yaxis={'categoryorder': 'total ascending'}, 
             xaxis_title="Łączna ilość (szt)",
