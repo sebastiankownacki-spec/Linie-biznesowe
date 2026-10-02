@@ -103,77 +103,10 @@ with col4:
 
 st.markdown("---")
 
-# Suwak kontrolujący liczbę wyświetlanych pozycji dla obu sekcji (Dania i Składniki)
+# Suwak kontrolujący liczbę wyświetlanych pozycji dla obu sekcji (Składniki i Dania)
 top_n = st.slider("Liczba wyświetlanych pozycji na wykresach:", min_value=5, max_value=200, value=10, step=5)
 
-# 5. Wykresy: Najpopularniejsze dania
-st.subheader("🔥 Najpopularniejsze dania")
-
-tab_szt, tab_kg = st.tabs([f"📦 Top {top_n} Dań - Sztuki (szt)", f"⚖️ Top {top_n} Dań - Waga (kg)"])
-
-with tab_szt:
-    df_szt = df_filtered[df_filtered['Jednostka'] == 'szt']
-    top_szt = (
-        df_szt.groupby('Nazwa dania')['Ilość']
-        .sum()
-        .reset_index()
-        .sort_values(by='Ilość', ascending=False)
-        .head(top_n)
-    )
-
-    if not top_szt.empty:
-        fig_szt = px.bar(
-            top_szt,
-            x='Ilość',
-            y='Nazwa dania',
-            orientation='h',
-            title=f"Top {top_n} dań pod względem liczby sztuk",
-            color_discrete_sequence=['#2b5c8f']
-        )
-        fig_szt.update_traces(texttemplate='%{x:,.0f}', textposition='outside')
-        fig_szt.update_layout(
-            yaxis={'categoryorder': 'total ascending'}, 
-            xaxis_title="Łączna ilość (szt)",
-            yaxis_title=None,
-            height=max(400, len(top_szt) * 28)
-        )
-        st.plotly_chart(fig_szt, use_container_width=True)
-    else:
-        st.info("Brak danych dla jednostki 'szt' w wybranym filtrze.")
-
-with tab_kg:
-    df_kg = df_filtered[df_filtered['Jednostka'] == 'kg']
-    top_kg = (
-        df_kg.groupby('Nazwa dania')['Ilość']
-        .sum()
-        .reset_index()
-        .sort_values(by='Ilość', ascending=False)
-        .head(top_n)
-    )
-
-    if not top_kg.empty:
-        fig_kg = px.bar(
-            top_kg,
-            x='Ilość',
-            y='Nazwa dania',
-            orientation='h',
-            title=f"Top {top_n} dań pod względem wagi (kg)",
-            color_discrete_sequence=['#e07a5f']
-        )
-        fig_kg.update_traces(texttemplate='%{x:,.2f}', textposition='outside')
-        fig_kg.update_layout(
-            yaxis={'categoryorder': 'total ascending'}, 
-            xaxis_title="Łączna waga (kg)",
-            yaxis_title=None,
-            height=max(400, len(top_kg) * 28)
-        )
-        st.plotly_chart(fig_kg, use_container_width=True)
-    else:
-        st.info("Brak danych dla jednostki 'kg' w wybranym filtrze.")
-
-st.markdown("---")
-
-# 6. Wykresy: Najpopularniejsze składniki (Kolumna H)
+# 5. Wykresy: Najpopularniejsze składniki (Kolumna H) - PRZENIESIONE W GÓRĘ
 st.subheader("🥗 Najpopularniejsze składniki")
 
 tab_skladnik_szt, tab_skladnik_kg = st.tabs([f"📦 Top {top_n} Składników - Sztuki (szt)", f"⚖️ Top {top_n} Składników - Waga (kg)"])
@@ -237,6 +170,73 @@ with tab_skladnik_kg:
         st.plotly_chart(fig_skl_kg, use_container_width=True)
     else:
         st.info("Brak danych składników dla jednostki 'kg'.")
+
+st.markdown("---")
+
+# 6. Wykresy: Najpopularniejsze dania - PRZENIESIONE W DÓŁ
+st.subheader("🔥 Najpopularniejsze dania")
+
+tab_szt, tab_kg = st.tabs([f"📦 Top {top_n} Dań - Sztuki (szt)", f"⚖️ Top {top_n} Dań - Waga (kg)"])
+
+with tab_szt:
+    df_szt = df_filtered[df_filtered['Jednostka'] == 'szt']
+    top_szt = (
+        df_szt.groupby('Nazwa dania')['Ilość']
+        .sum()
+        .reset_index()
+        .sort_values(by='Ilość', ascending=False)
+        .head(top_n)
+    )
+
+    if not top_szt.empty:
+        fig_szt = px.bar(
+            top_szt,
+            x='Ilość',
+            y='Nazwa dania',
+            orientation='h',
+            title=f"Top {top_n} dań pod względem liczby sztuk",
+            color_discrete_sequence=['#2b5c8f']
+        )
+        fig_szt.update_traces(texttemplate='%{x:,.0f}', textposition='outside')
+        fig_szt.update_layout(
+            yaxis={'categoryorder': 'total ascending'}, 
+            xaxis_title="Łączna ilość (szt)",
+            yaxis_title=None,
+            height=max(400, len(top_szt) * 28)
+        )
+        st.plotly_chart(fig_szt, use_container_width=True)
+    else:
+        st.info("Brak danych dla jednostki 'szt' w wybranym filtrze.")
+
+with tab_kg:
+    df_kg = df_filtered[df_filtered['Jednostka'] == 'kg']
+    top_kg = (
+        df_kg.groupby('Nazwa dania')['Ilość']
+        .sum()
+        .reset_index()
+        .sort_values(by='Ilość', ascending=False)
+        .head(top_n)
+    )
+
+    if not top_kg.empty:
+        fig_kg = px.bar(
+            top_kg,
+            x='Ilość',
+            y='Nazwa dania',
+            orientation='h',
+            title=f"Top {top_n} dań pod względem wagi (kg)",
+            color_discrete_sequence=['#e07a5f']
+        )
+        fig_kg.update_traces(texttemplate='%{x:,.2f}', textposition='outside')
+        fig_kg.update_layout(
+            yaxis={'categoryorder': 'total ascending'}, 
+            xaxis_title="Łączna waga (kg)",
+            yaxis_title=None,
+            height=max(400, len(top_kg) * 28)
+        )
+        st.plotly_chart(fig_kg, use_container_width=True)
+    else:
+        st.info("Brak danych dla jednostki 'kg' w wybranym filtrze.")
 
 st.markdown("---")
 
