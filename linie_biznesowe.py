@@ -103,12 +103,13 @@ with col4:
 
 st.markdown("---")
 
-# 5. Wykresy: Najpopularniejsze dania (suwak do 200 dań)
+# Suwak kontrolujący liczbę wyświetlanych pozycji dla obu sekcji (Dania i Składniki)
+top_n = st.slider("Liczba wyświetlanych pozycji na wykresach:", min_value=5, max_value=200, value=10, step=5)
+
+# 5. Wykresy: Najpopularniejsze dania
 st.subheader("🔥 Najpopularniejsze dania")
 
-top_n = st.slider("Liczba wyświetlanych dań na wykresie:", min_value=5, max_value=200, value=10, step=5)
-
-tab_szt, tab_kg = st.tabs([f"📦 Top {top_n} - Sztuki (szt)", f"⚖️ Top {top_n} - Waga (kg)"])
+tab_szt, tab_kg = st.tabs([f"📦 Top {top_n} Dań - Sztuki (szt)", f"⚖️ Top {top_n} Dań - Waga (kg)"])
 
 with tab_szt:
     df_szt = df_filtered[df_filtered['Jednostka'] == 'szt']
@@ -129,7 +130,6 @@ with tab_szt:
             title=f"Top {top_n} dań pod względem liczby sztuk",
             color_discrete_sequence=['#2b5c8f']
         )
-        # Formatowanie etykiet wartości – pełne liczby bez skrótu 'k'
         fig_szt.update_traces(texttemplate='%{x:,.0f}', textposition='outside')
         fig_szt.update_layout(
             yaxis={'categoryorder': 'total ascending'}, 
@@ -160,7 +160,6 @@ with tab_kg:
             title=f"Top {top_n} dań pod względem wagi (kg)",
             color_discrete_sequence=['#e07a5f']
         )
-        # Formatowanie etykiet wartości – waga do 2 miejsc po przecinku
         fig_kg.update_traces(texttemplate='%{x:,.2f}', textposition='outside')
         fig_kg.update_layout(
             yaxis={'categoryorder': 'total ascending'}, 
@@ -174,7 +173,74 @@ with tab_kg:
 
 st.markdown("---")
 
-# 6. Dodatkowe wykresy pomocnicze
+# 6. Wykresy: Najpopularniejsze składniki (Kolumna H)
+st.subheader("🥗 Najpopularniejsze składniki")
+
+tab_skladnik_szt, tab_skladnik_kg = st.tabs([f"📦 Top {top_n} Składników - Sztuki (szt)", f"⚖️ Top {top_n} Składników - Waga (kg)"])
+
+with tab_skladnik_szt:
+    df_skl_szt = df_filtered[df_filtered['Jednostka'] == 'szt']
+    top_skl_szt = (
+        df_skl_szt.groupby('Składnik')['Ilość']
+        .sum()
+        .reset_index()
+        .sort_values(by='Ilość', ascending=False)
+        .head(top_n)
+    )
+
+    if not top_skl_szt.empty:
+        fig_skl_szt = px.bar(
+            top_skl_szt,
+            x='Ilość',
+            y='Składnik',
+            orientation='h',
+            title=f"Top {top_n} składników pod względem liczby sztuk",
+            color_discrete_sequence=['#38b000']
+        )
+        fig_skl_szt.update_traces(texttemplate='%{x:,.0f}', textposition='outside')
+        fig_skl_szt.update_layout(
+            yaxis={'categoryorder': 'total ascending'}, 
+            xaxis_title="Łączna ilość (szt)",
+            yaxis_title=None,
+            height=max(400, len(top_skl_szt) * 28)
+        )
+        st.plotly_chart(fig_skl_szt, use_container_width=True)
+    else:
+        st.info("Brak danych składników dla jednostki 'szt'.")
+
+with tab_skladnik_kg:
+    df_skl_kg = df_filtered[df_filtered['Jednostka'] == 'kg']
+    top_skl_kg = (
+        df_skl_kg.groupby('Składnik')['Ilość']
+        .sum()
+        .reset_index()
+        .sort_values(by='Ilość', ascending=False)
+        .head(top_n)
+    )
+
+    if not top_skl_kg.empty:
+        fig_skl_kg = px.bar(
+            top_skl_kg,
+            x='Ilość',
+            y='Składnik',
+            orientation='h',
+            title=f"Top {top_n} składników pod względem wagi (kg)",
+            color_discrete_sequence=['#9d4edd']
+        )
+        fig_skl_kg.update_traces(texttemplate='%{x:,.2f}', textposition='outside')
+        fig_skl_kg.update_layout(
+            yaxis={'categoryorder': 'total ascending'}, 
+            xaxis_title="Łączna waga (kg)",
+            yaxis_title=None,
+            height=max(400, len(top_skl_kg) * 28)
+        )
+        st.plotly_chart(fig_skl_kg, use_container_width=True)
+    else:
+        st.info("Brak danych składników dla jednostki 'kg'.")
+
+st.markdown("---")
+
+# 7. Dodatkowe wykresy pomocnicze
 col_left, col_right = st.columns(2)
 
 with col_left:
@@ -202,7 +268,7 @@ with col_right:
     )
     st.plotly_chart(fig_line, use_container_width=True)
 
-# 7. Tabela danych ze szczegółami składników
+# 8. Tabela danych ze szczegółami składników
 st.markdown("---")
 st.subheader("🔍 Szczegółowe zestawienie dań i składników")
 
