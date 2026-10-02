@@ -103,10 +103,10 @@ with col4:
 
 st.markdown("---")
 
-# Suwak kontrolujący liczbę wyświetlanych pozycji dla obu sekcji (Składniki i Dania)
+# Suwak kontrolujący liczbę wyświetlanych pozycji dla obu sekcji
 top_n = st.slider("Liczba wyświetlanych pozycji na wykresach:", min_value=5, max_value=200, value=10, step=5)
 
-# 5. Wykresy: Najpopularniejsze składniki (Kolumna H) - PRZENIESIONE W GÓRĘ
+# 5. Wykresy: Najpopularniejsze składniki (Kolumna H)
 st.subheader("🥗 Najpopularniejsze składniki")
 
 tab_skladnik_szt, tab_skladnik_kg = st.tabs([f"📦 Top {top_n} Składników - Sztuki (szt)", f"⚖️ Top {top_n} Składników - Waga (kg)"])
@@ -173,7 +173,7 @@ with tab_skladnik_kg:
 
 st.markdown("---")
 
-# 6. Wykresy: Najpopularniejsze dania - PRZENIESIONE W DÓŁ
+# 6. Wykresy: Najpopularniejsze dania
 st.subheader("🔥 Najpopularniejsze dania")
 
 tab_szt, tab_kg = st.tabs([f"📦 Top {top_n} Dań - Sztuki (szt)", f"⚖️ Top {top_n} Dań - Waga (kg)"])
@@ -288,8 +288,8 @@ st.dataframe(
     height=300
 )
 
-# Przycisk pobierania przefiltrowanych danych
-csv_data = df_filtered.to_csv(index=False).encode('utf-8')
+# Przycisk pobierania przefiltrowanych danych z poprawionym kodowaniem i separatorem dla Excela
+csv_data = df_filtered.to_csv(index=False, sep=';', encoding='utf-8-sig').encode('utf-8-sig')
 st.download_button(
     label="📥 Pobierz przefiltrowane dane do CSV",
     data=csv_data,
